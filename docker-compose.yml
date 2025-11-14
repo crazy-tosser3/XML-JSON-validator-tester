@@ -1,0 +1,28 @@
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: validation_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: validator
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: validation_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  server:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    volumes:
+      - ./:/app
+      
+    environment:
+      DATABASE_URL: postgresql://validator:1234@database:5432/validation_db
+
+volumes:
+  postgres_data:
